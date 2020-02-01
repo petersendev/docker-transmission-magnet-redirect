@@ -52,7 +52,7 @@ stages:
       displayName: create github release (master)
       condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
       inputs:
-        gitHubConnection: 'petersendev PAT'
+        gitHubConnection: 'petersendev'
         repositoryName: 'petersendev/docker-transmission-magnet-redirect'
         action: 'create'
         target: '$(Build.SourceVersion)'
