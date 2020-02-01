@@ -1,0 +1,10 @@
+﻿@model TransmissionOptions;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>To redirect a magnet link, call @Url.Action("Magnet","Process", new {id="LINK"})</p>
+    <p>Using transmission rpc url <a href="http://@Model.Host:@Model.Port/transmission/rpc">http://@Model.Host:@Model.Port/transmission/rpc</a></p>
+</div>
