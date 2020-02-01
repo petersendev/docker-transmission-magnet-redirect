@@ -27,21 +27,21 @@ stages:
       condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
 
     - task: Docker@2
-      displayName: docker build and push dev
+      displayName: docker build and push (dev)
       condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
       inputs:
         containerRegistry: 'DockerHub'
-        repository: 'transmission-magnet-redirect'
+        repository: 'petersendev/transmission-magnet-redirect'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: 'dev'
 
     - task: Docker@2
-      displayName: docker build and push master
+      displayName: docker build and push (master)
       condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
       inputs:
         containerRegistry: 'DockerHub'
-        repository: 'transmission-magnet-redirect'
+        repository: 'petersendev/transmission-magnet-redirect'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: |
@@ -49,6 +49,7 @@ stages:
           $(NBGV_SemVer1)
 
     - task: GitHubRelease@1
+      displayName: create github release (master)
       condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
       inputs:
         gitHubConnection: 'petersendev PAT'
