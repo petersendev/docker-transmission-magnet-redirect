@@ -1,0 +1,64 @@
+# Docker
+# Build a Docker image 
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DotnetGlobalToolInstaller@0
+      displayName: install nbgv
+      inputs:
+        name: 'nbgv'
+
+    - script: nbgv cloud -c -a
+      displayName: set version
+      condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
+
+    - task: Docker@2
+      displayName: docker build and push (dev)
+      condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
+      inputs:
+        containerRegistry: 'DockerHub'
+        repository: 'petersendev/transmission-magnet-redirect'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: 'dev'
+
+    - task: Docker@2
+      displayName: docker build and push (master)
+      condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+      inputs:
+        containerRegistry: 'DockerHub'
+        repository: 'petersendev/transmission-magnet-redirect'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          latest
+          $(NBGV_SemVer1)
+
+    - task: GitHubRelease@1
+      displayName: create github release (master)
+      condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+      inputs:
+        gitHubConnection: 'petersendev PAT'
+        repositoryName: 'petersendev/docker-transmission-magnet-redirect'
+        action: 'create'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: '$(NBGV_SemVer1)'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: 'version $(NBGV_SemVer1)'
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
