@@ -27,12 +27,6 @@ stages:
       condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
 
     - task: Docker@2
-      displayName: docker login
-      inputs:
-        containerRegistry: 'DockerHub'
-        command: 'login'
-
-    - task: Docker@2
       displayName: docker build and push dev
       condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
       inputs:
